@@ -12,6 +12,7 @@ const Header = () => {
   const handleLogout = () => {
     console.log('first');
     setUserLogOut();
+    router.push('/login');
   };
 
   return (
@@ -32,12 +33,14 @@ const Header = () => {
             Đăng Nhập
           </Button>
         )}
-        <Button
-          color='inherit'
-          onClick={() => router.push('/rest')}
-        >
-          Ngày nghỉ
-        </Button>
+        {isLoggedIn && (
+          <Button
+            color='inherit'
+            onClick={() => router.push('/user')}
+          >
+            Ngày nghỉ
+          </Button>
+        )}
         {isLoggedIn && (
           <Button
             color='inherit'

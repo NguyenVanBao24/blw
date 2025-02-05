@@ -5,46 +5,49 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
+import { formatKey } from '@/contrants';
 
 export default function UseInformation() {
   const router = useRouter();
 
-  const { isLoggedIn } = useAppContext();
+  const { isLoggedIn, phone } = useAppContext();
   const [open, setOpen] = useState(true);
-  const handleClose = () => setOpen(true);
-  const employee = {
-    name: 'Nguyễn Văn A',
-    age: 30,
-    hometown: 'Đà Nẵng',
-  };
+  const [employee, setEmployee] = useState({});
 
-  const formatKey = (key: string) => {
-    const keyMap: { [key: string]: string } = {
-      name: 'Tên',
-      age: 'Tuổi',
-      hometown: 'Quê Quán',
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/find-salary', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          //   body: JSON.stringify({ phone }),
+          body: JSON.stringify({ name: 'nguyễn văn a' }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Lỗi: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setEmployee(data.data);
+      } catch (error) {
+        console.error('Lỗi khi gọi API:', error);
+      }
     };
-    return keyMap[key] || key;
-  };
 
+    fetchData();
+  }, [phone]);
+
+  const handleClose = () => setOpen(true);
   const handleLogin = () => {
     setOpen(false);
     router.push('/login');
   };
+
   return isLoggedIn ? (
     <TableContainer
       component={Paper}
@@ -55,7 +58,7 @@ export default function UseInformation() {
           {Object.entries(employee).map(([key, value]) => (
             <TableRow key={key}>
               <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKey(key)}</TableCell>
-              <TableCell>{value}</TableCell>
+              <TableCell>{String(value)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -87,10 +90,22 @@ export default function UseInformation() {
             variant='contained'
             onClick={handleLogin}
           >
-            Contained
+            Đi đăng nhập
           </Button>
         </Typography>
       </Box>
     </Modal>
   );
 }
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};

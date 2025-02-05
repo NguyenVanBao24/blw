@@ -12,11 +12,30 @@ const LoginForm = () => {
   const router = useRouter();
 
   // Xử lý đăng nhập
-  const handleLogin = (event: React.FormEvent) => {
+  const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Đăng nhập với:', { phone, password });
-    setUserLogIn('0708034532');
-    router.push('/');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/auth-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Đăng nhập thành công:', data.status);
+      if (data.status == 2000) {
+        setUserLogIn(phone);
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Lỗi khi đăng nhập:', error);
+    }
   };
 
   console.log(isLoggedIn, 'isLoggedIn');
