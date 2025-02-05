@@ -4,20 +4,6 @@ import { useAppContext } from '@/app/context/AppContext';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const rest = {
-    thang1: '1',
-    thang2: '2',
-    thang3: '3',
-    thang4: '4',
-    thang5: '5',
-    thang6: '6',
-    thang7: '7',
-    thang8: '7',
-    thang9: '7',
-    thang10: '7',
-    thang11: '7',
-    thang12: '7',
-  };
   const formatKeyRest = (key: string) => {
     const keyMap: { [key: string]: string } = {
       thang1: 'tháng 1',
@@ -35,7 +21,7 @@ export default function Home() {
     };
     return keyMap[key] || key;
   };
-  const { isLoggedIn, phone } = useAppContext();
+  const { phone } = useAppContext();
   const [employee, setEmployee] = useState({});
 
   useEffect(() => {
