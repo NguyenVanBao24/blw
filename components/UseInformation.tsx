@@ -25,7 +25,6 @@ export default function UseInformation() {
 
   const { isLoggedIn } = useAppContext();
   const [open, setOpen] = useState(true);
-  const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(true);
   const employee = {
     name: 'Nguyễn Văn A',
