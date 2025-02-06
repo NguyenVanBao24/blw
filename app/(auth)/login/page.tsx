@@ -29,9 +29,10 @@ const LoginForm = () => {
 
       const data = await response.json();
       console.log('Đăng nhập thành công:', data.status);
+      console.log(data.data[0][1], data.data[0][0], 'data.data[1], data.data[0]');
       if (data.status == 2000) {
         setUserLogIn(phone);
-        setUserInfo(data.data[1], data.data[0]);
+        setUserInfo(data.data[0][1], data.data[0][0]);
         router.push('/');
       }
     } catch (error) {
