@@ -24,8 +24,7 @@ export default function UseInformation() {
           headers: {
             'Content-Type': 'application/json',
           },
-          //   body: JSON.stringify({ phone }),
-          body: JSON.stringify({ name: 'nguyễn văn a' }),
+          body: JSON.stringify({ phone }),
         });
 
         if (!response.ok) {
