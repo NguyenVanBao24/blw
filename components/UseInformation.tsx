@@ -19,7 +19,7 @@ export default function UseInformation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/find-salary', {
+        const response = await fetch('https://bup-be.vercel.app/api/find-salary', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

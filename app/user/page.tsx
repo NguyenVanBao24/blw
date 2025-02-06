@@ -27,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/find-rest', {
+        const response = await fetch('https://bup-be.vercel.app/api/find-rest', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
