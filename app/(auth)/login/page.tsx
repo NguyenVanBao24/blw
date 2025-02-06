@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 const LoginForm = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const { isLoggedIn, setUserLogIn } = useAppContext();
+  const { isLoggedIn, setUserLogIn, setUserInfo } = useAppContext();
   const router = useRouter();
 
   // Xử lý đăng nhập
@@ -31,6 +31,7 @@ const LoginForm = () => {
       console.log('Đăng nhập thành công:', data.status);
       if (data.status == 2000) {
         setUserLogIn(phone);
+        setUserInfo(data.data[1], data.data[0]);
         router.push('/');
       }
     } catch (error) {

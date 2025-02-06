@@ -2,24 +2,46 @@
 import { useState } from 'react';
 import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import Image from 'next/image';
+import { useAppContext } from '@/app/context/AppContext';
 
 export default function RequestForm() {
-  const [employeeName, setEmployeeName] = useState('');
-  const [employeeId, setEmployeeId] = useState('');
+  const { name, employeeId, setUserLogIn, setUserInfo } = useAppContext();
+
+  const [employeeName, setEmployeeName] = useState(name);
+  const [employeeIdRequest, setEmployeeIdRequest] = useState(employeeId);
   const [requestType, setRequestType] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
   const [hasImage, setHasImage] = useState(false);
   const [image, setImage] = useState<string | null>(null); // ✅ Fix kiểu dữ liệu
 
-  const handleSubmit = (event: React.FormEvent) => {
+  console.log(name, employeeId);
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Submitting form:', { employeeName, employeeId, requestType, requestDescription, hasImage, image });
+    console.log('Submitting form:', { employeeName, employeeIdRequest, requestType, requestDescription, hasImage, image });
+
+    try {
+      const response = await fetch('http://localhost:3001/api/post-send-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: employeeName,
+          employeeId: employeeIdRequest,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Đăng nhập thành công:', data.status);
+    } catch (error) {
+      console.error('Lỗi khi đăng nhập:', error);
+    }
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
-      setImage(URL.createObjectURL(file)); // Không lỗi nữa
+      setImage(URL.createObjectURL(file));
     }
   };
 
@@ -43,10 +65,11 @@ export default function RequestForm() {
         <TextField
           label='Employee ID'
           fullWidth
-          value={employeeId}
-          onChange={(e) => setEmployeeId(e.target.value)}
+          value={employeeIdRequest}
+          onChange={(e) => setEmployeeIdRequest(e.target.value)}
           required
           sx={{ mb: 2 }}
+          disabled
         />
         <FormControl
           fullWidth
@@ -58,9 +81,9 @@ export default function RequestForm() {
             value={requestType}
             onChange={(e) => setRequestType(e.target.value)}
           >
-            <MenuItem value='Leave'>Leave</MenuItem>
-            <MenuItem value='Maintenance'>Maintenance</MenuItem>
-            <MenuItem value='Other'>Other</MenuItem>
+            <MenuItem value='Leave'>Xin chấm công</MenuItem>
+            <MenuItem value='Maintenance'>Xin đi trễ / về sớm</MenuItem>
+            <MenuItem value='Other'>Khác...</MenuItem>
           </Select>
         </FormControl>
         <TextField
@@ -70,7 +93,6 @@ export default function RequestForm() {
           fullWidth
           value={requestDescription}
           onChange={(e) => setRequestDescription(e.target.value)}
-          required
           sx={{ mb: 2 }}
         />
         <FormControlLabel
