@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useAppContext } from '@/app/context/AppContext';
 
 export default function RequestForm() {
-  const { name, employeeId, setUserLogIn, setUserInfo } = useAppContext();
+  const { name, employeeId } = useAppContext();
 
   const [employeeName, setEmployeeName] = useState(name);
   const [employeeIdRequest, setEmployeeIdRequest] = useState(employeeId);
