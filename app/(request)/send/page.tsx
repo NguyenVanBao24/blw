@@ -1,10 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel, fabClasses } from '@mui/material';
+import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
 import Image from 'next/image';
 import { useAppContext } from '@/app/context/AppContext';
 import Loading from '@/components/Loading';
-import { Calligraffitti } from 'next/font/google';
 
 const optionData = ['Xin chấm công', 'Xin đi trễ / về sớm', 'Khác..'];
 
@@ -39,8 +38,6 @@ export default function RequestForm() {
           Image: image,
         }),
       });
-
-      const data = await response.json();
     } catch (error) {
       console.error('Lỗi khi đăng nhập:', error);
     }
