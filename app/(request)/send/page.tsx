@@ -1,8 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
+import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel, fabClasses } from '@mui/material';
 import Image from 'next/image';
 import { useAppContext } from '@/app/context/AppContext';
+import Loading from '@/components/Loading';
+import { Calligraffitti } from 'next/font/google';
+
+const optionData = ['Xin chấm công', 'Xin đi trễ / về sớm', 'Khác..'];
 
 export default function RequestForm() {
   const { name, employeeId } = useAppContext();
@@ -12,15 +16,17 @@ export default function RequestForm() {
   const [requestType, setRequestType] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
   const [hasImage, setHasImage] = useState(false);
-  const [image, setImage] = useState<string | null>(null); // ✅ Fix kiểu dữ liệu
+  const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  console.log(name, employeeId);
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log('Submitting form:', { employeeName, employeeIdRequest, requestType, requestDescription, hasImage, image });
 
+    setLoading(true);
+
     try {
-      const response = await fetch('http://localhost:3001/api/post-send-request', {
+      const response = await fetch('https://bup-be.vercel.app/api/post-send-request', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,23 +34,50 @@ export default function RequestForm() {
         body: JSON.stringify({
           name: employeeName,
           employeeId: employeeIdRequest,
+          TypeRequest: requestType,
+          Request: requestDescription,
+          Image: image,
         }),
       });
 
       const data = await response.json();
-      console.log('Đăng nhập thành công:', data.status);
     } catch (error) {
       console.error('Lỗi khi đăng nhập:', error);
     }
-  };
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRequestType('');
+    setRequestDescription('');
+    setImage('');
+    setLoading(false);
+  };
+  if (loading) {
+    return <Loading />;
+  }
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
-      setImage(URL.createObjectURL(file));
+      const formData = new FormData();
+      formData.append('image', file);
+      setLoading(true);
+
+      try {
+        const response = await fetch('https://bup-be.vercel.app/api/post-email', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.imageUrl) {
+          setImage(data.imageUrl);
+        }
+      } catch (error) {
+        console.error('Lỗi khi upload ảnh lên Cloudinary:', error);
+      }
+
+      setLoading(false);
     }
   };
-
+  console.log(image, 'imageimageimageimageimage');
   return (
     <Box sx={{ maxWidth: 600, margin: 'auto', mt: 3 }}>
       <Typography
@@ -81,9 +114,14 @@ export default function RequestForm() {
             value={requestType}
             onChange={(e) => setRequestType(e.target.value)}
           >
-            <MenuItem value='Leave'>Xin chấm công</MenuItem>
-            <MenuItem value='Maintenance'>Xin đi trễ / về sớm</MenuItem>
-            <MenuItem value='Other'>Khác...</MenuItem>
+            {optionData.map((els) => (
+              <MenuItem
+                key={els}
+                value={els}
+              >
+                {els}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <TextField

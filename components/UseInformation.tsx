@@ -8,6 +8,7 @@ import Modal from '@mui/material/Modal';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatKey } from '@/contrants';
+import Loading from './Loading';
 
 export default function UseInformation() {
   const router = useRouter();
@@ -15,9 +16,11 @@ export default function UseInformation() {
   const { isLoggedIn, phone } = useAppContext();
   const [open, setOpen] = useState(true);
   const [employee, setEmployee] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch('https://bup-be.vercel.app/api/find-salary', {
           method: 'POST',
@@ -36,11 +39,14 @@ export default function UseInformation() {
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
+      setLoading(false);
     };
 
     fetchData();
   }, [phone]);
-
+  if (loading) {
+    return <Loading />;
+  }
   const handleClose = () => setOpen(true);
   const handleLogin = () => {
     setOpen(false);

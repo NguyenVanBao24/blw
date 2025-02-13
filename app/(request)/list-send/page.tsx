@@ -1,76 +1,106 @@
 'use client';
-import { useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, FormControlLabel } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogContent } from '@mui/material';
 import Image from 'next/image';
-
-type RowData = {
-  name: string;
-  employeeId: string;
-  requestType: string;
-  requestDescription: string;
-  imageUrl?: string; // Trường ảnh, có thể có hoặc không
-};
-
-const data: RowData[] = [
-  { name: 'John Doe', employeeId: 'E123', requestType: 'Leave', requestDescription: 'Vacation', imageUrl: '/path/to/image.jpg' },
-  { name: 'Jane Smith', employeeId: 'E124', requestType: 'Maintenance', requestDescription: 'Broken computer' },
-  { name: 'Alex Johnson', employeeId: 'E125', requestType: 'Other', requestDescription: 'Request for new chair', imageUrl: '/path/to/image2.jpg' },
-  { name: 'Maria Brown', employeeId: 'E126', requestType: 'Leave', requestDescription: 'Sick leave' },
-  { name: 'David Wilson', employeeId: 'E127', requestType: 'Maintenance', requestDescription: 'Server issue', imageUrl: '/path/to/image3.jpg' },
-];
+import { useAppContext } from '@/app/context/AppContext';
+import Loading from '@/components/Loading';
 
 export default function RequestTable() {
-  const [showImage, setShowImage] = useState<boolean>(false);
+  const [data, setData] = useState([]);
+  const { employeeId } = useAppContext();
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('');
 
-  const handleToggleImage = () => {
-    setShowImage(!showImage); // Chuyển đổi giữa hiển thị và ẩn hình ảnh
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const response = await fetch('https://bup-be.vercel.app/api/get-send-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          employeeId,
+        }),
+      });
+      const data = await response.json();
+      setData(data.data.rows);
+      setLoading(false);
+    };
+    fetchData();
+  }, [employeeId]);
+
+  if (loading) {
+    return <Loading />;
+  }
+
+  const handleClickOpen = (imageSrc: string) => {
+    setSelectedImage(imageSrc);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedImage('');
   };
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Employee ID</TableCell>
-              <TableCell>Request Type</TableCell>
-              <TableCell>Request Description</TableCell>
-              {showImage && <TableCell>Image</TableCell>} {/* Hiển thị cột Image khi toggle */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.employeeId}</TableCell>
-                <TableCell>{row.requestType}</TableCell>
-                <TableCell>{row.requestDescription}</TableCell>
-                {showImage && row.imageUrl && (
-                  <TableCell>
-                    <Image
-                      src={row.imageUrl}
-                      alt='Uploaded Image'
-                      width={100}
-                      height={100}
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </TableCell>
-                )}
+    <>
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Employee ID</TableCell>
+                <TableCell>Request Type</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Description</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={showImage}
-            onChange={handleToggleImage}
-          />
-        }
-        label='Show Image'
-      />
-    </Paper>
+            </TableHead>
+            <TableBody>
+              {data &&
+                data?.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row[1]}</TableCell>
+                    <TableCell>{row[3]}</TableCell>
+                    <TableCell>
+                      <Image
+                        src={row[4]}
+                        width={100}
+                        height={100}
+                        alt='Request Image'
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleClickOpen(row[4])}
+                      />
+                    </TableCell>
+                    <TableCell>{row[5] == false ? 'Chờ phê duyệt' : 'Đã phê duyệt'}</TableCell>
+                    <TableCell>{row[6]}</TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Dialog hiển thị hình ảnh */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth='lg'
+      >
+        <DialogContent>
+          {selectedImage && (
+            <Image
+              src={selectedImage}
+              width={800}
+              height={800}
+              alt='Full Screen Image'
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -2,6 +2,7 @@
 import { Table, TableBody, TableCell, TableContainer, TableRow, Paper } from '@mui/material';
 import { useAppContext } from '@/app/context/AppContext';
 import { useEffect, useState } from 'react';
+import Loading from '@/components/Loading';
 
 export default function Home() {
   const formatKeyRest = (key: string) => {
@@ -23,9 +24,12 @@ export default function Home() {
   };
   const { phone } = useAppContext();
   const [employee, setEmployee] = useState({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
       try {
         const response = await fetch('https://bup-be.vercel.app/api/find-rest', {
           method: 'POST',
@@ -46,11 +50,15 @@ export default function Home() {
       } catch (error) {
         console.error('Lỗi khi gọi API:', error);
       }
+      setLoading(false);
     };
 
     fetchData();
   }, [phone]);
 
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <TableContainer
       component={Paper}
