@@ -28,7 +28,7 @@ const Accept = () => {
     };
 
     fetchData();
-  }, []);
+  }, [phone]);
 
   const handleClose = () => {
     setOpen(false);

@@ -1,5 +1,6 @@
 export const API_ENDPOINTS = {
-  HOST: 'http://localhost:3001/api',
+  LOCALHOST: 'http://localhost:3001/api',
+  SERVER: 'https://bup-be.vercel.app/api',
   LOGIN: '/auth-login',
   SALARY_INFO: '/find-salary',
   REST_INFO: '/find-rest',

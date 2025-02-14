@@ -24,7 +24,7 @@ export default function UseInformation() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-
+      console.log(phone, 'phone');
       const requestData: SalaryInfoRequest = { phone };
       const response = await salaryInfo(requestData);
 

@@ -28,7 +28,7 @@ export const listSendRequestEmployee = async (data: ListSendRequestRequest): Pro
     const response = await fetchApi<ListSendRequestResponse>(API_ENDPOINTS.ALL_REQUEST_EMPLOYEE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ employeeId: 1 }),
     });
     if (!response.success) {
       throw new Error(response.message);

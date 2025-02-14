@@ -14,7 +14,7 @@ export default function RequestTable() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
-
+  console.log(employeeId, 'employeeId');
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);

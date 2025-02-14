@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from '@/constants/apiEndpoints';
 
 export const fetchApi = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
   try {
-    const response = await fetch(`${API_ENDPOINTS.HOST}${endpoint}`, options);
+    const response = await fetch(`${API_ENDPOINTS.SERVER}${endpoint}`, options);
     const data: T = await response.json();
 
     if (!response.ok) {
