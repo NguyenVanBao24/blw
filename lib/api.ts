@@ -6,7 +6,7 @@ export const fetchApi = async <T>(endpoint: string, options?: RequestInit): Prom
     const data: T = await response.json();
 
     if (!response.ok) {
-      throw new Error((data as any).message || 'Something went wrong');
+      throw new Error((data as string) || 'Something went wrong');
     }
 
     return data;

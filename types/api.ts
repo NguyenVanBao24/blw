@@ -109,3 +109,5 @@ export type InsertRequest = {
 };
 
 export type InsertResponse = ApiResponse<Insert | null>;
+
+export type RequestRow = [string, string, string, string, string | null, string, string];

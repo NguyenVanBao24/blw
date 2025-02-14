@@ -24,13 +24,6 @@ const Accept = () => {
 
       if (response?.success) {
         setData(response.data as []);
-
-        const initialStatuses: { [key: number]: string } = {};
-        response.data.forEach((row: any, index: number) => {
-          initialStatuses[index] = row[5] === 'FALSE' ? 'Chờ phê duyệt' : 'Đã phê duyệt';
-        });
-
-        setStatuses(initialStatuses);
       }
     };
 
