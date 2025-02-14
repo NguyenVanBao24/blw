@@ -9,36 +9,27 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatKey } from '@/contrants';
 import Loading from './Loading';
+import { SalaryInfo, SalaryInfoRequest } from '@/types/api';
+import { salaryInfo } from '@/services/user';
 
 export default function UseInformation() {
   const router = useRouter();
 
   const { isLoggedIn, phone } = useAppContext();
   const [open, setOpen] = useState(true);
-  const [employee, setEmployee] = useState({});
+  const [employee, setEmployee] = useState<SalaryInfo | null>(null);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      try {
-        const response = await fetch('https://bup-be.vercel.app/api/find-salary', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ phone }),
-        });
 
-        if (!response.ok) {
-          throw new Error(`Lỗi: ${response.status} ${response.statusText}`);
-        }
+      const requestData: SalaryInfoRequest = { phone };
+      const response = await salaryInfo(requestData);
 
-        const data = await response.json();
-        setEmployee(data.data);
-      } catch (error) {
-        console.error('Lỗi khi gọi API:', error);
-      }
+      setEmployee(response.data);
+
       setLoading(false);
     };
 
@@ -60,12 +51,13 @@ export default function UseInformation() {
     >
       <Table>
         <TableBody>
-          {Object.entries(employee).map(([key, value]) => (
-            <TableRow key={key}>
-              <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKey(key)}</TableCell>
-              <TableCell>{String(value)}</TableCell>
-            </TableRow>
-          ))}
+          {employee &&
+            Object.entries(employee).map(([key, value]) => (
+              <TableRow key={key}>
+                <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKey(key)}</TableCell>
+                <TableCell>{String(value)}</TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

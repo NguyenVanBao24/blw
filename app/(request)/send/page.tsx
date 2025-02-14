@@ -1,9 +1,11 @@
 'use client';
 import { useState } from 'react';
 import { TextField, MenuItem, Select, FormControl, InputLabel, Button, Box, Typography, Checkbox, FormControlLabel } from '@mui/material';
-import Image from 'next/image';
 import { useAppContext } from '@/app/context/AppContext';
 import Loading from '@/components/Loading';
+import CustomModal from '@/components/CustomModal';
+import { SendImageRequest, SendRequestRequest } from '@/types/api';
+import { sendImage, sendRequest } from '@/services/request';
 
 const optionData = ['Xin chấm công', 'Xin đi trễ / về sớm', 'Khác..'];
 
@@ -17,64 +19,71 @@ export default function RequestForm() {
   const [hasImage, setHasImage] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const [file, setFile] = useState<File | null>(null);
+  const [errorState, setErrorState] = useState({ state: false, text: '' });
+  console.log(image);
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Submitting form:', { employeeName, employeeIdRequest, requestType, requestDescription, hasImage, image });
-
     setLoading(true);
 
     try {
-      const response = await fetch('https://bup-be.vercel.app/api/post-send-request', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: employeeName,
-          employeeId: employeeIdRequest,
-          TypeRequest: requestType,
-          Request: requestDescription,
-          Image: image,
-        }),
-      });
+      let imageUrl = '';
+
+      if (file) {
+        const formData: SendImageRequest = new FormData();
+        formData.append('image', file);
+
+        console.log(file);
+        console.log([...formData.entries()]);
+
+        const response = await sendImage(formData);
+
+        if (response.success) {
+          imageUrl = response.data?.image || '';
+          if (imageUrl == '') {
+            console.log(imageUrl, 'imageUrlimageUrlimageUrl');
+            return setErrorState({ state: true, text: 'Gửi yêu cầu thất bại' });
+          }
+          setImage(imageUrl);
+        }
+      }
+
+      const requestBody: SendRequestRequest = {
+        name: employeeName,
+        employeeId: employeeIdRequest,
+        TypeRequest: requestType,
+        Request: requestDescription,
+        Image: imageUrl,
+      };
+
+      const response = await sendRequest(requestBody);
+
+      if (response.success == true) {
+        setErrorState({ state: true, text: 'Gửi yêu cầu thành công' });
+      } else {
+        setErrorState({ state: true, text: 'Gửi yêu cầu thất bại' });
+      }
     } catch (error) {
-      console.error('Lỗi khi đăng nhập:', error);
+      console.error('Lỗi khi gửi request:', error);
+      setErrorState({ state: false, text: '' });
     }
 
     setRequestType('');
     setRequestDescription('');
-    setImage('');
+    setImage(null);
+    setFile(null);
     setLoading(false);
   };
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0] || null;
+    setFile(selectedFile);
+  };
+
   if (loading) {
     return <Loading />;
   }
-  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null;
-    if (file) {
-      const formData = new FormData();
-      formData.append('image', file);
-      setLoading(true);
 
-      try {
-        const response = await fetch('https://bup-be.vercel.app/api/post-email', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await response.json();
-        if (data.imageUrl) {
-          setImage(data.imageUrl);
-        }
-      } catch (error) {
-        console.error('Lỗi khi upload ảnh lên Cloudinary:', error);
-      }
-
-      setLoading(false);
-    }
-  };
-  console.log(image, 'imageimageimageimageimage');
   return (
     <Box sx={{ maxWidth: 600, margin: 'auto', mt: 3 }}>
       <Typography
@@ -91,6 +100,7 @@ export default function RequestForm() {
           onChange={(e) => setEmployeeName(e.target.value)}
           required
           sx={{ mb: 2 }}
+          disabled
         />
         <TextField
           label='Employee ID'
@@ -111,12 +121,12 @@ export default function RequestForm() {
             value={requestType}
             onChange={(e) => setRequestType(e.target.value)}
           >
-            {optionData.map((els) => (
+            {optionData.map((option) => (
               <MenuItem
-                key={els}
-                value={els}
+                key={option}
+                value={option}
               >
-                {els}
+                {option}
               </MenuItem>
             ))}
           </Select>
@@ -153,15 +163,9 @@ export default function RequestForm() {
                 onChange={handleImageChange}
               />
             </Button>
-            {image && (
+            {file && (
               <Box sx={{ mt: 2 }}>
-                <Image
-                  src={image}
-                  alt='Uploaded'
-                  width={200}
-                  height={200}
-                  style={{ maxWidth: '100%', height: 'auto' }}
-                />
+                <Typography variant='body2'>Selected: {file.name}</Typography>
               </Box>
             )}
           </Box>
@@ -176,6 +180,14 @@ export default function RequestForm() {
           </Button>
         </Box>
       </form>
+
+      {errorState && (
+        <CustomModal
+          open={errorState.state}
+          onClose={() => setErrorState({ state: false, text: '' })}
+          text={errorState.text}
+        />
+      )}
     </Box>
   );
 }

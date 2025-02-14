@@ -1,8 +1,7 @@
-'use client'; // Nếu bạn dùng App Router
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// 1. Xác định kiểu dữ liệu cho context
 type AppContextType = {
   isLoggedIn: boolean;
   phone: string;
@@ -13,36 +12,62 @@ type AppContextType = {
   setUserInfo: (name: string, employeeId: string) => void;
 };
 
-// 2. Khởi tạo context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// 3. Tạo Provider
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [phone, setPhone] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [employeeId, setEmployeeId] = useState<string>('');
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  // Hàm cập nhật user
+  // Khi component mount, lấy dữ liệu từ localStorage
+  useEffect(() => {
+    const storedPhone = localStorage.getItem('phone');
+    const storedName = localStorage.getItem('name');
+    const storedEmployeeId = localStorage.getItem('employeeId');
+    const storedIsLoggedIn = localStorage.getItem('isLoggedIn');
+
+    if (storedIsLoggedIn === 'true' && storedPhone) {
+      setPhone(storedPhone);
+      setIsLoggedIn(true);
+      if (storedName && storedEmployeeId) {
+        setName(storedName);
+        setEmployeeId(storedEmployeeId);
+      }
+    }
+  }, []);
+
+  // Hàm cập nhật user khi đăng nhập
   const setUserLogIn = (phone: string) => {
     setPhone(phone);
     setIsLoggedIn(true);
+    localStorage.setItem('phone', phone);
+    localStorage.setItem('isLoggedIn', 'true');
   };
 
+  // Hàm cập nhật thông tin user
   const setUserInfo = (name: string, employeeId: string) => {
     setName(name);
     setEmployeeId(employeeId);
+    localStorage.setItem('name', name);
+    localStorage.setItem('employeeId', employeeId);
   };
 
+  // Hàm đăng xuất
   const setUserLogOut = () => {
     setPhone('');
     setIsLoggedIn(false);
+    setName('');
+    setEmployeeId('');
+    localStorage.removeItem('phone');
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('name');
+    localStorage.removeItem('employeeId');
   };
 
   return <AppContext.Provider value={{ isLoggedIn, phone, setUserLogIn, setUserLogOut, setUserInfo, name, employeeId }}>{children}</AppContext.Provider>;
 };
 
-// 4. Hook để sử dụng context
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {

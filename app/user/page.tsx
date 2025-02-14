@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableContainer, TableRow, Paper } from '@m
 import { useAppContext } from '@/app/context/AppContext';
 import { useEffect, useState } from 'react';
 import Loading from '@/components/Loading';
+import { RestInfo, RestInfoRequest } from '@/types/api';
+import { restInfo } from '@/services/user';
 
 export default function Home() {
   const formatKeyRest = (key: string) => {
@@ -22,43 +24,27 @@ export default function Home() {
     };
     return keyMap[key] || key;
   };
-  const { phone } = useAppContext();
-  const [employee, setEmployee] = useState({});
+  const { name } = useAppContext();
+  const [employee, setEmployee] = useState<RestInfo | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-
-      try {
-        const response = await fetch('https://bup-be.vercel.app/api/find-rest', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          //   body: JSON.stringify({ phone }),
-          body: JSON.stringify({ name: 'phan đình mẫn' }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Lỗi: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setEmployee(data.data);
-        console.log('Kết quả API:', data.data);
-      } catch (error) {
-        console.error('Lỗi khi gọi API:', error);
-      }
+      const requestData: RestInfoRequest = { name };
+      const response = await restInfo(requestData);
+      setEmployee(response.data);
       setLoading(false);
     };
 
     fetchData();
-  }, [phone]);
+  }, [name]);
 
   if (loading) {
     return <Loading />;
   }
+
+  console.log(name, '123name');
   return (
     <TableContainer
       component={Paper}
@@ -66,12 +52,13 @@ export default function Home() {
     >
       <Table>
         <TableBody>
-          {Object.entries(employee).map(([key, value]) => (
-            <TableRow key={key}>
-              <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKeyRest(key)}</TableCell>
-              <TableCell>{String(value)}</TableCell>
-            </TableRow>
-          ))}
+          {employee &&
+            Object.entries(employee).map(([key, value]) => (
+              <TableRow key={key}>
+                <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKeyRest(key)}</TableCell>
+                <TableCell>{String(value)}</TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </TableContainer>

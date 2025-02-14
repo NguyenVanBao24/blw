@@ -1,10 +1,12 @@
-'use client'; // Nếu dùng App Router
+'use client';
 
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Paper } from '@mui/material';
 import { useAppContext } from '@/app/context/AppContext';
 import { useRouter } from 'next/navigation';
 import Loading from '@/components/Loading';
+import { LoginRequest } from '@/types/api';
+import { login } from '@/services/auth';
 
 const LoginForm = () => {
   const [phone, setPhone] = useState('');
@@ -14,34 +16,26 @@ const LoginForm = () => {
   const { isLoggedIn, setUserLogIn, setUserInfo } = useAppContext();
   const router = useRouter();
 
-  // Xử lý đăng nhập
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
 
-    try {
-      const response = await fetch('https://bup-be.vercel.app/api/auth-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phone,
-          password,
-        }),
-      });
+    const requestData: LoginRequest = { phone, password };
+    const response = await login(requestData);
 
-      const data = await response.json();
-      console.log('Đăng nhập thành công:', data.status);
-      console.log(data.data[0][1], data.data[0][0], 'data.data[1], data.data[0]');
-      if (data.status == 2000) {
-        setUserLogIn(phone);
-        setUserInfo(data.data[0][1], data.data[0][0]);
-        router.push('/');
+    if (response.success) {
+      setUserLogIn(phone);
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        setUserInfo(response.data[0][1], response.data[0][0]);
+      } else {
+        console.error('Dữ liệu trả về không đúng định dạng');
+        return;
       }
-    } catch (error) {
-      console.error('Lỗi khi đăng nhập:', error);
+      router.push('/');
+    } else {
+      console.error('Lỗi từ API:', response.message);
     }
+
     setLoading(false);
   };
 
