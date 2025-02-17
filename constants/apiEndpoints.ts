@@ -10,4 +10,6 @@ export const API_ENDPOINTS = {
 
   ALL_REQUEST_ADMIN: '/get-all-send-request',
   ACCEPT_ADMIN: '/insert-accept-request',
+
+  TIMEKEEPING_INSERT: '/timekeeping-insert',
 };

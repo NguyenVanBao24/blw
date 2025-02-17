@@ -6,13 +6,15 @@ import Loading from '@/components/Loading';
 import CustomModal from '@/components/CustomModal';
 import { SendImageRequest, SendRequestRequest } from '@/types/api';
 import { sendImage, sendRequest } from '@/services/request';
+// import DatePick from '@/components/DatePick';
 
-const optionData = ['Xin chấm công', 'Xin đi trễ / về sớm', 'Khác..'];
+const optionData = ['Xin chấm công', 'Xin đi trễ', 'Xin về sớm', 'Khác..'];
 
 export default function RequestForm() {
   const { name, employeeId } = useAppContext();
 
   const [employeeName, setEmployeeName] = useState(name);
+  // const [atHour, setAtHour] = useState('');
   const [employeeIdRequest, setEmployeeIdRequest] = useState(employeeId);
   const [requestType, setRequestType] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
@@ -131,6 +133,17 @@ export default function RequestForm() {
             ))}
           </Select>
         </FormControl>
+        {/* <div className='flex'>
+          <DatePick />
+          <TextField
+            label='Giờ'
+            fullWidth
+            value={atHour}
+            onChange={(e) => setAtHour(e.target.value)}
+            required
+            sx={{ mb: 2 }}
+          />
+        </div> */}
         <TextField
           label='Request Description'
           multiline

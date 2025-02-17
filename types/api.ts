@@ -104,10 +104,28 @@ export type Insert = {
 };
 
 export type InsertRequest = {
-  requestId: string;
+  employeeId: string;
   value: string;
 };
 
 export type InsertResponse = ApiResponse<Insert | null>;
 
 export type RequestRow = [string, string, string, string, string | null, string, string];
+
+// ----------------------------
+
+export type Timekeeping = {
+  // spreadsheetId: string;
+  // updatedRange: string;
+  // updatedRows: string;
+  // updatedColumns: string;
+  // updatedCells: string;
+};
+
+export type TimekeepingRequest = {
+  employeeId: string;
+  dayTimekeeping: string;
+  values: string;
+};
+
+export type TimekeepingResponse = ApiResponse<string | null>;

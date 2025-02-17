@@ -1,10 +1,10 @@
 import { fetchApi } from '@/lib/api';
 import { API_ENDPOINTS } from '@/constants/apiEndpoints';
-import { InsertRequest, InsertResponse } from '@/types/api';
+import { TimekeepingRequest, TimekeepingResponse } from '@/types/api';
 
-export const insertAccept = async (data: InsertRequest): Promise<InsertResponse> => {
+export const timekeepingInsert = async (data: TimekeepingRequest): Promise<TimekeepingResponse> => {
   try {
-    const response = await fetchApi<InsertResponse>(API_ENDPOINTS.ACCEPT_ADMIN, {
+    const response = await fetchApi<TimekeepingResponse>(API_ENDPOINTS.TIMEKEEPING_INSERT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),

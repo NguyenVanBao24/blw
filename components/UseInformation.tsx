@@ -54,7 +54,7 @@ export default function UseInformation() {
           {employee &&
             Object.entries(employee).map(([key, value]) => (
               <TableRow key={key}>
-                <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>{formatKey(key)}</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', width: '50%' }}>{formatKey(key)}</TableCell>
                 <TableCell>{String(value)}</TableCell>
               </TableRow>
             ))}

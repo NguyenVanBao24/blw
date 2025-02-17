@@ -6,9 +6,11 @@ import { Select, MenuItem, Table, TableBody, TableCell, TableContainer, TableHea
 import Image from 'next/image';
 import { SelectChangeEvent } from '@mui/material';
 import { listSendRequestAdmin } from '@/services/request';
-import { InsertRequest } from '@/types/api';
+import { InsertRequest, TimekeepingRequest } from '@/types/api';
 import { insertAccept } from '@/services/admin';
 import CustomModal from '@/components/CustomModal';
+import { timekeepingInsert } from '@/services/timekeeping';
+import Loading from '@/components/Loading';
 
 const Accept = () => {
   const { phone } = useAppContext();
@@ -17,11 +19,11 @@ const Accept = () => {
   const [selectedImage, setSelectedImage] = useState('');
   const [statuses, setStatuses] = useState<{ [key: number]: string }>({});
   const [errorState, setErrorState] = useState({ state: false, text: '' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await listSendRequestAdmin();
-
       if (response?.success) {
         setData(response.data as []);
       }
@@ -50,20 +52,38 @@ const Accept = () => {
     }));
   };
 
-  const handleSaveAccept = async (requestId: string, index: number) => {
-    const value = statuses[index];
-    const requestData: InsertRequest = { requestId, value };
-    console.log(requestId, value, 'employeeId, valueemployeeId, value');
+  const handleSaveAccept = async (employeeId: string, index: number, dayTimekeeping: string) => {
+    setLoading(true);
+    try {
+      const value = statuses[index];
+      const requestData: InsertRequest = { employeeId, value };
 
-    const response = await insertAccept(requestData);
-    console.log(requestId, value, 'employeeId, valueemployeeId, value');
+      const response = await insertAccept(requestData);
 
-    if (response.success == true) {
-      setErrorState({ state: true, text: 'Gửi yêu cầu thành công' });
-    } else {
-      setErrorState({ state: true, text: 'Gửi yêu cầu thất bại' });
+      const date = dayTimekeeping.toString().split('/')[0];
+
+      if (response.success == true) {
+        const requestData: TimekeepingRequest = { employeeId, dayTimekeeping: date, values: '9999' };
+
+        const nextResponse = await timekeepingInsert(requestData);
+
+        if (nextResponse.success == true) {
+          setErrorState({ state: true, text: 'Gửi yêu cầu thành công' });
+        } else {
+          setErrorState({ state: true, text: 'Gửi yêu cầu thất bại' });
+        }
+      } else {
+        setErrorState({ state: true, text: 'Gửi yêu cầu thất bại' });
+      }
+    } catch (error) {
+      console.log(error);
     }
+    setLoading(false);
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   if (phone !== '0708034532') {
     return <div>Bạn không được cấp quyền truy cập</div>;
@@ -76,27 +96,29 @@ const Accept = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Employee ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Request Type</TableCell>
-                <TableCell>Image</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Reply Status</TableCell>
-                <TableCell>Timestamp</TableCell>
-                <TableCell>Save</TableCell>
+                <TableCell>Mã nhân viên</TableCell>
+                <TableCell>Tên</TableCell>
+                <TableCell>Loại yêu cầu</TableCell>
+                <TableCell>Ảnh</TableCell>
+                <TableCell>Nội dung</TableCell>
+                <TableCell>Trạng thái</TableCell>
+                <TableCell>Ngày xin phép</TableCell>
+                <TableCell>Thời gian gửi yêu cầu</TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {Array.isArray(data) &&
                 data.map((row, index) => {
                   const request = {
-                    employeeId: row[0], // ID nhân viên
-                    TypeRequest: row[1], // Loại yêu cầu
+                    employeeId: row[0],
+                    TypeRequest: row[1],
                     name: row[2],
                     Request: row[3],
-                    Image: row[4] || '', // URL hình ảnh (nếu có)
-                    ReplyRequest: row[5] === 'FALSE' ? 'Chờ phê duyệt' : 'Đã phê duyệt', // Trạng thái
-                    Timestamp: row[6],
+                    Image: row[4] || '',
+                    DateTimekeeping: row[5],
+                    ReplyRequest: row[6],
+                    Timestamp: row[7],
                   };
 
                   return (
@@ -129,11 +151,11 @@ const Accept = () => {
                           <MenuItem value='Đã phê duyệt'>Đã phê duyệt</MenuItem>
                         </Select>
                       </TableCell>
-
+                      <TableCell>{request.DateTimekeeping}</TableCell>
                       <TableCell>{request.Timestamp}</TableCell>
                       <TableCell>
                         <Button
-                          onClick={() => handleSaveAccept(request.employeeId, index)}
+                          onClick={() => handleSaveAccept(request.employeeId, index, request.DateTimekeeping)}
                           variant='contained'
                         >
                           Lưu

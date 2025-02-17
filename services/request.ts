@@ -24,11 +24,13 @@ export const sendRequest = async (data: SendRequestRequest): Promise<SendRequest
 };
 
 export const listSendRequestEmployee = async (data: ListSendRequestRequest): Promise<ListSendRequestResponse> => {
+  console.log(data, 'HR-EMP-00327HR-EMP-00327HR-EMP-00327');
+  const employeeId = data.employeeId;
   try {
     const response = await fetchApi<ListSendRequestResponse>(API_ENDPOINTS.ALL_REQUEST_EMPLOYEE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ employeeId: 1 }),
+      body: JSON.stringify({ employeeId }),
     });
     if (!response.success) {
       throw new Error(response.message);
